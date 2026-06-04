@@ -264,20 +264,37 @@ canvas{display:block;border-radius:8px}
       <div style="font-size:24px;font-weight:700;letter-spacing:-.02em">Income vs Expenses</div>
     </div>
     <div class="sec">
-      <div class="charts-row">
-        <div class="chart-wrap">
-          <div class="chart-title">Last 6 months</div>
-          <canvas id="bar-chart" height="160"></canvas>
-          <div class="legend">
-            <span class="leg-item"><span class="leg-dot" style="background:#34d399"></span>Income</span>
-            <span class="leg-item"><span class="leg-dot" style="background:#f87171"></span>Expenses</span>
+      <!-- Bar chart: 6-month overview -->
+      <div class="chart-wrap">
+        <div class="chart-title">Last 6 months — income vs expenses</div>
+        <canvas id="bar-chart" height="160"></canvas>
+        <div class="legend">
+          <span class="leg-item"><span class="leg-dot" style="background:#34d399"></span>Income</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#f87171"></span>Expenses</span>
+        </div>
+      </div>
+
+      <!-- Spending by category with month picker -->
+      <div class="chart-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
+          <div class="chart-title" style="margin-bottom:0">Spending by category</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button id="pie-prev" onclick="shiftPieMonth(-1)"
+              style="width:28px;height:28px;border-radius:8px;border:1px solid var(--bdr);background:var(--el);color:var(--sub);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1">‹</button>
+            <span id="pie-month-label" style="font-size:12px;font-weight:600;color:var(--b4);min-width:60px;text-align:center"></span>
+            <button id="pie-next" onclick="shiftPieMonth(1)"
+              style="width:28px;height:28px;border-radius:8px;border:1px solid var(--bdr);background:var(--el);color:var(--sub);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1">›</button>
           </div>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-title">Spending by category (this month)</div>
-          <canvas id="pie-chart" height="180"></canvas>
-          <div id="pie-legend" class="legend" style="flex-direction:column;gap:8px;margin-top:12px"></div>
-        </div>
+        <canvas id="pie-chart" height="180"></canvas>
+        <div id="pie-legend" class="legend" style="flex-direction:column;gap:8px;margin-top:12px"></div>
+      </div>
+
+      <!-- Category trend: stacked bars across 6 months -->
+      <div class="chart-wrap">
+        <div class="chart-title">Category breakdown — last 6 months</div>
+        <canvas id="trend-chart" height="160"></canvas>
+        <div id="trend-legend" class="legend" style="flex-wrap:wrap;gap:10px;margin-top:12px"></div>
       </div>
     </div>
   </div>
@@ -571,9 +588,39 @@ function parseStatement(text) {
     const dm=raw.match(DATE_RE); if(!dm)continue;
     const dateStr=parseDate(dm[0]); if(!dateStr)continue;
     const txAmt=amounts.length>1?amounts.reduce((a,b)=>a.val<b.val?a:b):amounts[0];
-    const hasNeg=/(?:^|\s)-\$?[\d]|\(-/.test(raw)||txAmt.inP;
-    const hasCredit=/\b(cr|credit|deposit|refund|transfer in|received|salary|payroll)\b/i.test(raw);
-    const type=hasCredit&&!hasNeg?'income':'expense';
+    // ── Income/expense detection ─────────────────────────────────────────────
+    // Explicit negative markers → always expense
+    const hasNeg = /(?:^|\s)-\$?[\d]|\(-/.test(raw) || txAmt.inP;
+
+    // Strong income keywords in the raw line
+    const incomeKw = /\b(payroll|direct deposit|dd |ach credit|ach dep|salary|wages|paycheck|dividend|interest paid|tax refund|tax credit|stimulus|benefits paid|pension|annuity|freelance|consulting fee|invoice paid|transfer in|wire credit|deposit|credit|refund|received|venmo from|zelle from|cashapp from|paypal credit|reimbursement)\b/i;
+    const hasIncomeKw = incomeKw.test(raw);
+
+    // Strong expense keywords
+    const expenseKw = /\b(purchase|debit|withdrawal|payment|charge|fee|pos |ach debit|check #|chk |draft|transfer out|wire debit|autopay|bill pay|subscription)\b/i;
+    const hasExpenseKw = expenseKw.test(raw);
+
+    // Description-based income detection (after stripping date/amounts)
+    let descForType = raw.replace(dm[0],'')
+      .replace(/\(([\d,\.]+)\)/g,'').replace(/\$?\s*[\d,]+\.\d{2}/g,'')
+      .replace(/\$[\d,]+/g,'').toLowerCase();
+    const incomeDesc = /payroll|salary|wages|deposit|dividend|interest|refund|credit|transfer in|received|reimburs|bonus|commission|consulting|freelance|rent received|rental income|investment|return/.test(descForType);
+
+    let type;
+    if (hasNeg) {
+      // Explicit negative = expense, unless strong income keyword overrides
+      type = hasIncomeKw && !hasExpenseKw ? 'income' : 'expense';
+    } else if (hasIncomeKw) {
+      type = 'income';
+    } else if (hasExpenseKw) {
+      type = 'expense';
+    } else if (incomeDesc) {
+      type = 'income';
+    } else {
+      // Also check autocat — if it matches an income category, treat as income
+      const tentativeCat = autocat(descForType, 'income');
+      type = (tentativeCat !== 'Other') ? 'income' : 'expense';
+    }
     let desc=raw.replace(dm[0],'').replace(/\([\d,\.]+\)/g,'').replace(/\$?\s*[\d,]+\.\d{2}/g,'').replace(/\$[\d,]+/g,'');
     desc=desc.replace(/\b(cr|dr|debit|credit|purchase|withdrawal|deposit|refund|payment|transfer)\b/gi,'');
     desc=desc.replace(/[·•|#*\[\]]/g,' ').replace(/\s{2,}/g,' ').replace(/^[\-\/\s]+|[\-\/\s]+$/g,'').trim();
@@ -589,6 +636,8 @@ let selectedMonth = today.getMonth();
 let selectedYear  = today.getFullYear();
 let swipedId      = null;
 let addType       = 'expense';
+let chartPieMonth = today.getMonth();
+let chartPieYear  = today.getFullYear();
 let addCategory   = 'Food';
 let importMode    = 'paste';
 let parsedTxs     = [];
@@ -670,6 +719,22 @@ function renderHome() {
 function renderCharts() {
   renderBarChart();
   renderPieChart();
+  renderTrendChart();
+}
+
+function shiftPieMonth(dir) {
+  chartPieMonth += dir;
+  if (chartPieMonth < 0)  { chartPieMonth = 11; chartPieYear--; }
+  if (chartPieMonth > 11) { chartPieMonth = 0;  chartPieYear++; }
+  // Disable next if we'd go past current month
+  const nextBtn = document.getElementById('pie-next');
+  if (nextBtn) {
+    const isCurrentOrFuture = chartPieYear > today.getFullYear() ||
+      (chartPieYear === today.getFullYear() && chartPieMonth >= today.getMonth());
+    nextBtn.style.opacity = isCurrentOrFuture ? '0.3' : '1';
+    nextBtn.disabled = isCurrentOrFuture;
+  }
+  renderPieChart();
 }
 
 function renderBarChart() {
@@ -725,16 +790,32 @@ function renderBarChart() {
 }
 
 function renderPieChart() {
+  // Update month label
+  const label = document.getElementById('pie-month-label');
+  if (label) label.textContent = MONTHS[chartPieMonth] + ' ' + chartPieYear;
+
+  // Disable/enable next button
+  const nextBtn = document.getElementById('pie-next');
+  if (nextBtn) {
+    const isCurrentOrFuture = chartPieYear > today.getFullYear() ||
+      (chartPieYear === today.getFullYear() && chartPieMonth >= today.getMonth());
+    nextBtn.style.opacity = isCurrentOrFuture ? '0.3' : '1';
+    nextBtn.disabled = isCurrentOrFuture;
+  }
+
   const canvas = document.getElementById('pie-chart');
   const W = canvas.parentElement.clientWidth - 32;
   canvas.width = W; canvas.height = 180;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,W,180);
 
-  const curMo = txs.filter(t=>{const d=new Date(t.date);return d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()&&t.type==='expense';});
+  const moTxs = txs.filter(t=>{
+    const d=new Date(t.date);
+    return d.getMonth()===chartPieMonth && d.getFullYear()===chartPieYear && t.type==='expense';
+  });
   const map={};
-  curMo.forEach(t=>map[t.category]=(map[t.category]||0)+t.amount);
-  const entries=Object.entries(map);
+  moTxs.forEach(t=>map[t.category]=(map[t.category]||0)+t.amount);
+  const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]);
   const total=entries.reduce((s,[,v])=>s+v,0);
 
   const legend=document.getElementById('pie-legend');
@@ -742,11 +823,12 @@ function renderPieChart() {
 
   if(!entries.length){
     ctx.fillStyle='#3a5278'; ctx.font='14px DM Sans,sans-serif'; ctx.textAlign='center';
-    ctx.fillText('No expense data this month',W/2,95);
+    ctx.fillText('No expense data for ' + MONTHS[chartPieMonth], W/2, 90);
     return;
   }
 
-  const cx=90, cy=90, ro=70, ri=40;
+  // Draw donut — left half of canvas
+  const cx = Math.min(90, W*0.35), cy=90, ro=70, ri=42;
   let angle=-Math.PI/2;
 
   entries.forEach(([name,val])=>{
@@ -761,14 +843,97 @@ function renderPieChart() {
     ctx.fill();
     ctx.strokeStyle='#060c1a'; ctx.lineWidth=2; ctx.stroke();
     angle+=slice;
+  });
 
-    // Legend row
+  // Total in centre
+  ctx.fillStyle='#e8f0fe'; ctx.font='bold 13px DM Sans,sans-serif'; ctx.textAlign='center';
+  ctx.fillText(fmt(total), cx, cy+2);
+  ctx.fillStyle='#6b8cc4'; ctx.font='10px DM Sans,sans-serif';
+  ctx.fillText('total', cx, cy+16);
+
+  // Legend rows
+  entries.forEach(([name,val])=>{
+    const meta=catMeta('expense',name);
     const pct=Math.round(val/total*100);
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;gap:8px';
     row.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${meta.color};flex-shrink:0;display:inline-block"></span><span style="flex:1;font-size:13px;color:#6b8cc4">${meta.icon} ${name}</span><span style="font-size:13px;font-weight:600;color:#e8f0fe">${fmt(val)}</span><span style="font-size:12px;color:#3a5278;min-width:32px;text-align:right">${pct}%</span>`;
     legend.appendChild(row);
   });
+}
+
+function renderTrendChart() {
+  const canvas = document.getElementById('trend-chart');
+  if (!canvas) return;
+  const W = canvas.parentElement.clientWidth - 32;
+  canvas.width = W; canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,160);
+
+  // Build 6-month category data
+  const months = [];
+  for (let i=5; i>=0; i--) {
+    const m = (today.getMonth()-i+12)%12;
+    const y = today.getMonth()-i < 0 ? today.getFullYear()-1 : today.getFullYear();
+    const moTxs = txs.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y&&t.type==='expense';});
+    const catMap = {};
+    moTxs.forEach(t=>catMap[t.category]=(catMap[t.category]||0)+t.amount);
+    months.push({label:MONTHS[m], cats:catMap, total:moTxs.reduce((s,t)=>s+t.amount,0)});
+  }
+
+  // Find all categories that appear
+  const allCats = [...new Set(months.flatMap(m=>Object.keys(m.cats)))];
+  if (!allCats.length) {
+    ctx.fillStyle='#3a5278'; ctx.font='14px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('No expense data yet', W/2, 85);
+    const tl=document.getElementById('trend-legend'); if(tl)tl.innerHTML='';
+    return;
+  }
+
+  const maxTotal = Math.max(...months.map(m=>m.total), 1);
+  const padL=28, padR=8, padT=8, padB=28;
+  const chartH=160-padT-padB, chartW=W-padL-padR;
+  const barW=chartW/6*0.65, groupGap=chartW/6;
+
+  // Grid
+  ctx.strokeStyle='#1a2e50'; ctx.lineWidth=1;
+  [0,0.25,0.5,0.75,1].forEach(r=>{
+    const y=padT+chartH*(1-r);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+  });
+
+  // Stacked bars
+  months.forEach((mo,i)=>{
+    const x = padL + i*groupGap + (groupGap-barW)/2;
+    let stackY = padT+chartH; // start from bottom
+
+    allCats.forEach(cat=>{
+      const val = mo.cats[cat]||0;
+      if (!val) return;
+      const h = (val/maxTotal)*chartH;
+      const meta = catMeta('expense', cat);
+      ctx.fillStyle = meta.color;
+      ctx.beginPath(); ctx.roundRect(x, stackY-h, barW, h, i===0?[0,0,3,3]:[0,0,3,3]); ctx.fill();
+      stackY -= h;
+    });
+
+    // Month label
+    ctx.fillStyle='#6b8cc4'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(mo.label, padL+i*groupGap+groupGap/2, 160-6);
+  });
+
+  // Legend
+  const tl=document.getElementById('trend-legend');
+  if (tl) {
+    tl.innerHTML='';
+    allCats.forEach(cat=>{
+      const meta=catMeta('expense',cat);
+      const span=document.createElement('span');
+      span.className='leg-item';
+      span.innerHTML=`<span class="leg-dot" style="background:${meta.color}"></span>${meta.icon} ${cat}`;
+      tl.appendChild(span);
+    });
+  }
 }
 
 // ─── Summary ──────────────────────────────────────────────────────────────────
