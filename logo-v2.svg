@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" width="480" height="160">
+  <defs>
+
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040d1f"/>
+      <stop offset="100%" stop-color="#071428"/>
+    </linearGradient>
+
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0c1e3d"/>
+    </linearGradient>
+
+    <linearGradient id="shieldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <linearGradient id="lineGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#2563eb"/>
+      <stop offset="50%"  stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+
+    <linearGradient id="title2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#e8f0fe"/>
+      <stop offset="100%" stop-color="#93c5fd"/>
+    </linearGradient>
+
+    <linearGradient id="sub2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- Background -->
+  <rect width="480" height="160" rx="20" fill="url(#bg2)"/>
+
+  <!-- Horizontal scan lines for texture -->
+  <g opacity="0.04" stroke="#60a5fa" stroke-width="0.5">
+    <line x1="0" y1="20" x2="480" y2="20"/>
+    <line x1="0" y1="40" x2="480" y2="40"/>
+    <line x1="0" y1="60" x2="480" y2="60"/>
+    <line x1="0" y1="80" x2="480" y2="80"/>
+    <line x1="0" y1="100" x2="480" y2="100"/>
+    <line x1="0" y1="120" x2="480" y2="120"/>
+    <line x1="0" y1="140" x2="480" y2="140"/>
+  </g>
+
+  <!-- ── Shield icon ── -->
+  <!-- Shield glow -->
+  <path d="M80,22 L128,40 L128,88 Q128,120 80,138 Q32,120 32,88 L32,40 Z"
+        fill="#2563eb" opacity="0.12" filter="url(#softGlow)"/>
+
+  <!-- Shield body -->
+  <path d="M80,26 L124,43 L124,88 Q124,116 80,132 Q36,116 36,88 L36,43 Z"
+        fill="url(#shieldGrad)" stroke="url(#shieldStroke)" stroke-width="1.5"/>
+
+  <!-- Shield inner highlight -->
+  <path d="M80,32 L118,47 L118,88 Q118,112 80,126"
+        fill="none" stroke="white" stroke-width="0.8" opacity="0.1"/>
+
+  <!-- Sparkline inside shield — rising line chart -->
+  <polyline points="48,98 60,88 72,92 84,74 96,78 108,60"
+            fill="none" stroke="url(#lineGrad2)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"
+            filter="url(#glow2)"/>
+
+  <!-- Area fill under sparkline -->
+  <polygon points="48,98 60,88 72,92 84,74 96,78 108,60 108,106 48,106"
+           fill="url(#lineGrad2)" opacity="0.12"/>
+
+  <!-- Sparkline dots -->
+  <circle cx="48"  cy="98" r="2.5" fill="#2563eb"/>
+  <circle cx="72"  cy="92" r="2.5" fill="#3b82f6"/>
+  <circle cx="96"  cy="78" r="2.5" fill="#60a5fa"/>
+  <circle cx="108" cy="60" r="4"   fill="#34d399" stroke="#040d1f" stroke-width="1.5" filter="url(#glow2)"/>
+
+  <!-- Dollar sign watermark -->
+  <text x="80" y="118" text-anchor="middle"
+        font-family="Georgia, serif" font-size="13" font-weight="700"
+        fill="#60a5fa" opacity="0.35">$</text>
+
+  <!-- ── Wordmark ── -->
+  <text x="152" y="78"
+        font-family="'DM Sans', 'Segoe UI', system-ui, sans-serif"
+        font-size="42" font-weight="700" letter-spacing="-1"
+        fill="url(#title2)">Finance</text>
+
+  <text x="152" y="122"
+        font-family="'DM Sans', 'Segoe UI', system-ui, sans-serif"
+        font-size="42" font-weight="700" letter-spacing="-1"
+        fill="url(#sub2)">Tracker</text>
+
+  <!-- Accent line left of text -->
+  <rect x="148" y="40" width="2" height="94" rx="1" fill="url(#shieldStroke)" opacity="0.5"/>
+
+  <!-- Tagline -->
+  <text x="154" y="148"
+        font-family="'DM Sans', 'Segoe UI', system-ui, sans-serif"
+        font-size="11" font-weight="500" letter-spacing="3.5"
+        fill="#3b82f6" opacity="0.8">SMART · SIMPLE · SECURE</text>
+
+</svg>
