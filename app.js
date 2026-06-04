@@ -146,7 +146,7 @@ function parseStatement(text) {
 // ─── PDF Extractor ────────────────────────────────────────────────────────────
 async function extractTextFromPDF(file) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -658,4 +658,17 @@ function App() {
 }
 
 // ─── Mount ────────────────────────────────────────────────────────────────────
-ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+(function() {
+  try {
+    if (typeof React === 'undefined')    throw new Error('React failed to load. Check your internet connection.');
+    if (typeof ReactDOM === 'undefined') throw new Error('ReactDOM failed to load.');
+    if (typeof Recharts === 'undefined') throw new Error('Recharts failed to load.');
+    ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+  } catch(err) {
+    document.getElementById('app').innerHTML =
+      '<div style="padding:40px;color:#f87171;font-family:sans-serif;background:#060c1a;min-height:100vh">' +
+      '<h2 style="margin-bottom:12px">Failed to load</h2>' +
+      '<p style="color:#6b8cc4;font-size:14px">' + err.message + '</p>' +
+      '</div>';
+  }
+})();
