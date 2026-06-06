@@ -190,95 +190,111 @@ canvas{display:block;border-radius:8px}
    TABLET  ≥ 768px
 ═══════════════════════════════════════════ */
 @media(min-width:768px){
-  html,body{overflow:hidden;background:linear-gradient(170deg,#071228 0%,#060c1a 55%,#060c1a 100%);background-attachment:fixed;height:100%}
+  html,body{
+    overflow:hidden;
+    background:linear-gradient(170deg,#071228 0%,#060c1a 55%,#060c1a 100%);
+    background-attachment:fixed;
+    height:100%;
+  }
 
-  /* Full-height shell with sidebar */
+  /* ── App shell: sidebar LEFT + content RIGHT ── */
   #app{
-    max-width:900px;
+    width:100%;
+    max-width:1200px;
     height:100dvh;
     display:flex;
-    flex-direction:row;
+    flex-direction:row;   /* sidebar first in HTML = left */
     margin:0 auto;
-    box-shadow:0 0 80px #000d;
     overflow:hidden;
   }
 
-  /* Hide mobile-only elements */
+  /* ── Hide mobile-only elements ── */
   .logo-bar{display:none!important}
   .action-bar{display:none!important}
   .nav-action{display:none!important}
 
-  /* Show FABs on tablet+ */
-  .fabs{display:flex;position:absolute;bottom:24px;left:16px;right:unset;width:calc(220px - 32px);flex-direction:row;justify-content:flex-start;gap:10px;z-index:20}
-
-  /* ── Sidebar (reset top-bar mobile styles) ── */
+  /* ── Sidebar ── */
   .nav{
-    top:unset!important;
-    border-bottom:none;
-    border-top:none;
-    /* reset mobile fixed positioning */
-    position:relative;
+    /* reset mobile fixed/top positioning */
+    position:relative !important;
+    top:unset !important;
+    bottom:unset;
+    left:unset;
     transform:none;
-    left:unset;bottom:unset;
-    width:220px;min-width:220px;
+    /* sizing */
+    width:240px;
+    min-width:240px;
+    max-width:240px;
     height:100dvh;
-    max-width:220px;
+    flex-shrink:0;
     /* layout */
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
     align-items:stretch;
+    padding:28px 0 120px; /* bottom padding for FABs */
     gap:2px;
-    padding:28px 0 24px;
     /* style */
-    background:rgba(13,27,48,0.92);
-    border-top:none;
+    background:rgba(10,20,40,0.95);
     border-right:1px solid var(--bdr);
+    border-top:none;
+    border-bottom:none;
     border-radius:0;
-    backdrop-filter:blur(12px);
-    flex-shrink:0;
-    z-index:10;
+    backdrop-filter:blur(16px);
     overflow-y:auto;
-    position:relative;
+    overflow-x:hidden;
+    z-index:10;
   }
+
+  /* Sidebar nav buttons */
   .nav-btn{
     flex:0 0 auto;
     flex-direction:row;
     justify-content:flex-start;
     align-items:center;
     gap:12px;
-    padding:12px 20px;
+    padding:12px 18px;
     font-size:14px;
     letter-spacing:.02em;
     font-weight:500;
-    border-radius:12px;
-    margin:0 10px;
+    border-radius:10px;
+    margin:1px 10px;
     width:calc(100% - 20px);
     max-width:none;
+    color:var(--sub);
+    transition:all .18s;
   }
+  .nav-btn:hover{background:rgba(37,99,235,0.1);color:var(--b4)}
   .nav-btn.active{
     background:linear-gradient(135deg,var(--b2),var(--b1));
     color:#fff;
-    box-shadow:0 4px 16px #1d4ed844;
+    box-shadow:0 4px 14px #1d4ed840;
   }
   .nav-ico{font-size:20px}
 
   /* Sidebar logo */
-  .nav-logo{display:flex!important;padding:0 16px;margin-bottom:24px;align-items:center}
-  .nav-logo svg{height:48px;width:auto;max-width:100%}
+  .nav-logo{
+    display:flex !important;
+    padding:0 14px;
+    margin-bottom:20px;
+    align-items:center;
+  }
+  .nav-logo svg{height:52px;width:auto;max-width:100%}
 
-  /* FABs pinned to bottom of sidebar */
+  /* FABs — fixed inside sidebar at bottom-left */
   .fabs{
-    position:absolute;
-    bottom:24px;
-    left:16px;
-    right:unset;
-    width:calc(220px - 32px);
+    display:flex;
+    position:fixed;
+    bottom:20px;
+    left:0;
+    width:240px;
     flex-direction:row;
-    justify-content:flex-start;
+    justify-content:center;
     gap:10px;
     z-index:20;
+    padding:0 16px;
   }
+  .fab{width:44px;height:44px;border-radius:12px;font-size:20px}
 
   /* ── Main content area ── */
   .content{
@@ -286,71 +302,94 @@ canvas{display:block;border-radius:8px}
     min-width:0;
     height:100dvh;
     overflow-y:auto;
+    overflow-x:hidden;
     padding-top:0;
     padding-bottom:40px;
+    background:transparent;
   }
 
   /* Header */
-  .hdr{padding:32px 28px 24px}
-  .logo-wrap{display:none!important}
+  .hdr{padding:32px 32px 24px}
+  .logo-wrap{display:none !important}
   .bal-amount{font-size:52px}
   .pill-val{font-size:22px}
-  .sec{padding:0 28px;margin-bottom:24px}
+
+  /* Sections */
+  .sec{padding:0 32px;margin-bottom:24px}
   .month-scroll{padding:0 32px 4px}
+
+  /* Transaction rows — ensure they clip correctly */
+  .tx-wrap{border-radius:0}
+  .tx-row{padding:14px 0}
+  .tx-ico{width:44px;height:44px;font-size:20px}
+  .tx-cat{font-size:15px}
+  .tx-note{font-size:13px}
+  .tx-amt{font-size:16px}
 
   /* Charts side-by-side */
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .charts-row .chart-wrap{margin-bottom:0}
 
+  /* Summary */
+  .sum-card-val{font-size:18px}
+
   /* Modals: centered dialog */
   .overlay{align-items:center;justify-content:center;padding:24px}
-  .mbox{border-radius:20px;max-width:480px;width:100%;max-height:85dvh;margin:0}
-
-  .tx-ico{width:44px;height:44px;font-size:20px}
-  .tx-cat{font-size:15px}
-  .tx-amt{font-size:16px}
-  .sum-card-val{font-size:18px}
+  .mbox{
+    border-radius:20px;
+    max-width:500px;
+    width:100%;
+    max-height:85dvh;
+    margin:0;
+    border-top:none;
+    border:1px solid var(--bdr);
+  }
 }
 
 /* ═══════════════════════════════════════════
-   DESKTOP  ≥ 1100px
+   DESKTOP  ≥ 1200px
 ═══════════════════════════════════════════ */
-@media(min-width:1100px){
-  body{display:flex;align-items:center;justify-content:center;padding:24px 0;background:linear-gradient(170deg,#071228 0%,#060c1a 55%,#060c1a 100%);background-attachment:fixed}
-
-  #app{
-    max-width:1080px;
-    height:calc(100dvh - 48px);
-    border-radius:24px;
-    overflow:hidden;
-    border:1px solid var(--bdr);
-    box-shadow:0 0 100px #000e;
+@media(min-width:1200px){
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    background:linear-gradient(170deg,#071228 0%,#060c1a 55%,#060c1a 100%);
+    background-attachment:fixed;
   }
 
-  .content{height:calc(100dvh - 48px);padding-top:0;overflow-y:auto}
+  #app{
+    max-width:1400px;
+    width:100%;
+    height:100dvh;
+    border-radius:0;
+    border:none;
+    overflow:hidden;
+  }
 
+  .content{height:100dvh;padding-top:0;overflow-y:auto}
+
+  /* Wider sidebar */
   .nav{
     width:260px;
     min-width:260px;
     max-width:260px;
-    height:calc(100dvh - 48px);
-    padding:36px 0 28px;
+    height:100dvh;
+    padding:32px 0 110px;
   }
-  .nav-logo svg{height:56px}
-  .nav-btn{margin:0 12px;width:calc(100% - 24px)}
+  .nav-logo svg{height:58px}
+  .nav-btn{margin:1px 12px;width:calc(100% - 24px);padding:13px 18px}
 
-  /* FABs inside sidebar, bottom-left */
-  .fabs{
-    width:calc(260px - 40px);
-    left:20px;
-    bottom:28px;
-  }
+  /* FABs */
+  .fabs{width:260px;left:0;padding:0 20px;bottom:20px}
 
-  .hdr{padding:36px 36px 28px}
-  .bal-amount{font-size:56px}
-  .sec{padding:0 36px;margin-bottom:28px}
-  .month-scroll{padding:0 36px 4px}
-  .mbox{max-width:520px}
+  .hdr{padding:36px 40px 28px}
+  .bal-amount{font-size:58px}
+  .sec{padding:0 40px;margin-bottom:28px}
+  .month-scroll{padding:0 40px 4px}
+  .mbox{max-width:540px}
+  .pill{padding:16px 20px}
 }
 
 </style>
