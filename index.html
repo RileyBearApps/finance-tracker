@@ -56,8 +56,6 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1) s
 
 /* tx rows */
 .tx-wrap{position:relative;overflow:hidden}
-.tx-wrap:hover .tx-del{transform:translateX(0)}
-.tx-wrap:hover .tx-row{transform:translateX(-80px)}
 .tx-del{position:absolute;right:0;top:0;bottom:0;background:#dc2626;border:none;color:#fff;padding:0 20px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;transform:translateX(100%);transition:transform .2s ease}
 .tx-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--bdr2);background:transparent;transition:transform .25s;cursor:pointer;position:relative}
 .tx-row.swiped{transform:translateX(-80px)}
@@ -324,11 +322,10 @@ canvas{display:block;border-radius:8px}
   .sec{padding:0 32px;margin-bottom:24px}
   .month-scroll{padding:0 32px 4px}
 
-  /* Transaction rows — hover to reveal delete on desktop */
-  .tx-del{transform:translateX(100%)} /* hidden by default */
-  .tx-wrap:hover .tx-del{transform:translateX(0)} /* reveal on hover */
-  .tx-wrap:hover .tx-row{transform:translateX(-80px)}
-  .tx-row.swiped{transform:translateX(0) !important} /* disable mobile swipe on desktop */
+  /* Transaction rows — hover reveals delete button on tablet/desktop only */
+  .tx-del{transform:translateX(100%)}
+  .tx-wrap:hover .tx-del{transform:translateX(0)}
+  .tx-wrap:hover .tx-row:not(.swiped){transform:translateX(-80px)}
 
   /* Transaction rows — ensure they clip correctly */
   .tx-wrap{border-radius:0}
