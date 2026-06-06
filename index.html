@@ -187,8 +187,9 @@ canvas{display:block;border-radius:8px}
 .pdf-drop{border:2px dashed var(--bdr);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;background:var(--el);margin-bottom:14px;transition:all .2s}
 .pdf-drop.done{border-color:#34d39966;background:#0a2018}
 
-/* Hide sidebar logo on mobile */
+/* Hide sidebar logo and actions on mobile */
 .nav-logo{display:none!important}
+.sidebar-actions{display:none}
 
 /* ═══════════════════════════════════════════
    TABLET  ≥ 768px
@@ -216,6 +217,8 @@ canvas{display:block;border-radius:8px}
   .logo-bar{display:none!important}
   .action-bar{display:none!important}
   .nav-action{display:none!important}
+  /* Show sidebar actions */
+  .sidebar-actions{display:block}
 
   /* ── Sidebar ── */
   .nav{
@@ -236,7 +239,7 @@ canvas{display:block;border-radius:8px}
     flex-direction:column;
     justify-content:flex-start;
     align-items:stretch;
-    padding:28px 0 120px; /* bottom padding for FABs */
+    padding:28px 0 8px;
     gap:2px;
     /* style */
     background:rgba(10,20,40,0.95);
@@ -245,8 +248,7 @@ canvas{display:block;border-radius:8px}
     border-bottom:none;
     border-radius:0;
     backdrop-filter:blur(16px);
-    overflow-y:auto;
-    overflow-x:hidden;
+    overflow:visible;
     z-index:10;
   }
 
@@ -285,20 +287,29 @@ canvas{display:block;border-radius:8px}
   }
   .nav-logo svg{height:52px;width:auto;max-width:100%}
 
-  /* FABs — fixed inside sidebar at bottom-left */
-  .fabs{
-    display:flex;
-    position:fixed;
-    bottom:20px;
-    left:0;
-    width:240px;
-    flex-direction:row;
-    justify-content:center;
-    gap:10px;
-    z-index:20;
-    padding:0 16px;
+  /* Sidebar action buttons — match nav-btn style */
+  .sidebar-actions{
+    margin-top:auto;
+    padding:8px 0 16px;
+    background:none;
   }
-  .fab{width:44px;height:44px;border-radius:12px;font-size:20px}
+  .sidebar-divider{
+    height:1px;background:var(--bdr);
+    margin:0 14px 10px;
+  }
+  .sidebar-action-btn{
+    display:flex;flex-direction:row;
+    align-items:center;gap:12px;
+    width:calc(100% - 20px);margin:1px 10px;
+    padding:10px 18px;
+    font-size:13px;font-weight:500;letter-spacing:.02em;
+    font-family:inherit;color:var(--sub);
+    background:none;border:none;cursor:pointer;
+    border-radius:10px;transition:all .18s;
+    text-align:left;
+  }
+  .sidebar-action-btn:hover{background:rgba(37,99,235,0.1);color:var(--b4)}
+  .sidebar-action-ico{font-size:17px;width:22px;text-align:center;flex-shrink:0}
 
   /* ── Main content area ── */
   .content{
@@ -322,18 +333,47 @@ canvas{display:block;border-radius:8px}
   .sec{padding:0 32px;margin-bottom:24px}
   .month-scroll{padding:0 32px 4px}
 
-  /* Transaction rows — hover reveals delete button on tablet/desktop only */
-  .tx-del{transform:translateX(100%)}
-  .tx-wrap:hover .tx-del{transform:translateX(0)}
-  .tx-wrap:hover .tx-row:not(.swiped){transform:translateX(-80px)}
+  /* Transaction rows — desktop uses inline delete icon, hide swipe delete */
+  .tx-del{display:none}
 
-  /* Transaction rows — ensure they clip correctly */
-  .tx-wrap{border-radius:0}
-  .tx-row{padding:14px 0}
-  .tx-ico{width:44px;height:44px;font-size:20px}
-  .tx-cat{font-size:15px}
-  .tx-note{font-size:13px}
-  .tx-amt{font-size:16px}
+  /* Transaction rows — desktop card style */
+  .tx-wrap{
+    border-radius:12px;
+    margin-bottom:6px;
+    background:rgba(12,22,40,0.7);
+    border:1px solid var(--bdr2);
+    transition:background .15s, border-color .15s;
+  }
+  .tx-wrap:hover{
+    background:rgba(18,32,56,0.9);
+    border-color:var(--bdr);
+  }
+  .tx-row{
+    padding:13px 16px;
+    border-bottom:none;
+    cursor:default;
+  }
+  .tx-ico{width:40px;height:40px;font-size:19px}
+  .tx-cat{font-size:14px}
+  .tx-note{font-size:12px}
+  .tx-amt{font-size:15px}
+  /* Desktop inline delete button */
+  .tx-row-del{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;height:30px;
+    border-radius:8px;
+    border:none;
+    background:transparent;
+    color:var(--dim);
+    cursor:pointer;
+    font-size:16px;
+    flex-shrink:0;
+    transition:background .15s,color .15s;
+    margin-left:4px;
+  }
+  .tx-row-del:hover{background:rgba(220,38,38,0.15);color:#f87171}
 
   /* Charts side-by-side */
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -390,8 +430,8 @@ canvas{display:block;border-radius:8px}
   .nav-logo svg{height:58px}
   .nav-btn{margin:1px 12px;width:calc(100% - 24px);padding:13px 18px}
 
-  /* FABs */
-  .fabs{width:260px;left:0;padding:0 20px;bottom:20px}
+  /* Sidebar actions wider on desktop */
+  .sidebar-action-btn{font-size:14px;padding:11px 20px}
 
   .hdr{padding:36px 40px 28px}
   .bal-amount{font-size:58px}
@@ -411,6 +451,18 @@ canvas{display:block;border-radius:8px}
   <button class="nav-btn active" id="nav-home" onclick="switchTab('home')"><span class="nav-ico">⊞</span>Home</button>
   <button class="nav-btn" id="nav-charts" onclick="switchTab('charts')"><span class="nav-ico">◉</span>Charts</button>
   <button class="nav-btn" id="nav-summary" onclick="switchTab('summary')"><span class="nav-ico">≡</span>Summary</button>
+  <!-- Sidebar actions — tablet/desktop only, hidden on mobile via CSS -->
+  <div class="sidebar-actions" id="sidebar-actions">
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-action-btn" onclick="openAdd()">
+      <span class="sidebar-action-ico">＋</span>
+      <span>Add Transaction</span>
+    </button>
+    <button class="sidebar-action-btn" onclick="openImport()">
+      <span class="sidebar-action-ico">📋</span>
+      <span>Import Statement</span>
+    </button>
+  </div>
 </nav>
 <div class="content">
   <!-- Home Tab -->
@@ -496,11 +548,6 @@ canvas{display:block;border-radius:8px}
   </div>
 </div>
 
-<!-- FABs -->
-<div class="fabs">
-  <button class="fab fab-imp" onclick="openImport()" title="Import statement">📋</button>
-  <button class="fab fab-add" onclick="openAdd()" title="Add transaction">＋</button>
-</div>
 
 <!-- Logo bar (mobile only) -->
 <div class="logo-bar" id="mobile-logo-bar"></div>
@@ -969,37 +1016,56 @@ function switchTab(tab) {
 
 // ─── Render helpers ───────────────────────────────────────────────────────────
 function txRow(tx, showDate, container) {
-  const meta = catMeta(tx.type, tx.category);
-  const wrap = document.createElement('div');
+  const meta    = catMeta(tx.type, tx.category);
+  const isDesktop = window.innerWidth >= 768;
+  const wrap    = document.createElement('div');
   wrap.className = 'tx-wrap';
 
-  const delBtn = document.createElement('button');
-  delBtn.className = 'tx-del';
-  delBtn.textContent = 'Delete';
-  delBtn.onclick = () => { txs = txs.filter(t=>t.id!==tx.id); save(); switchTab(currentTab); };
-
-  const row = document.createElement('div');
-  row.className = 'tx-row';
-  row.onclick = () => {
-    if(swipedId===tx.id){ swipedId=null; row.classList.remove('swiped'); }
-    else { swipedId=tx.id; row.classList.add('swiped'); }
-  };
-
   const ico = document.createElement('div');
-  ico.className='tx-ico';
-  ico.style.cssText=`background:${meta.color}18;border:1px solid ${meta.color}28`;
-  ico.textContent=meta.icon;
+  ico.className = 'tx-ico';
+  ico.style.cssText = `background:${meta.color}18;border:1px solid ${meta.color}28`;
+  ico.textContent = meta.icon;
 
   const meta2 = document.createElement('div');
-  meta2.className='tx-meta';
-  meta2.innerHTML=`<div class="tx-cat">${tx.category}</div><div class="tx-note">${tx.note}${showDate?' · '+tx.date.slice(5):''}</div>`;
+  meta2.className = 'tx-meta';
+  const noteText = tx.note + (showDate ? ' · ' + tx.date.slice(5) : '');
+  meta2.innerHTML = `<div class="tx-cat">${tx.category}</div><div class="tx-note">${noteText}</div>`;
 
   const amt = document.createElement('div');
-  amt.className='tx-amt '+(tx.type==='income'?'inc-col':'exp-col');
-  amt.textContent=(tx.type==='income'?'+':'−')+fmt(tx.amount);
+  amt.className = 'tx-amt ' + (tx.type==='income' ? 'inc-col' : 'exp-col');
+  amt.textContent = (tx.type==='income' ? '+' : '−') + fmt(tx.amount);
 
-  row.append(ico,meta2,amt);
-  wrap.append(delBtn,row);
+  if (isDesktop) {
+    // Desktop: card row with inline ✕ delete button
+    const row = document.createElement('div');
+    row.className = 'tx-row';
+
+    const del = document.createElement('button');
+    del.className = 'tx-row-del';
+    del.title = 'Delete';
+    del.textContent = '✕';
+    del.onclick = (e) => { e.stopPropagation(); txs = txs.filter(t=>t.id!==tx.id); save(); switchTab(currentTab); };
+
+    row.append(ico, meta2, amt, del);
+    wrap.appendChild(row);
+  } else {
+    // Mobile: swipe-to-delete
+    const delBtn = document.createElement('button');
+    delBtn.className = 'tx-del';
+    delBtn.textContent = 'Delete';
+    delBtn.onclick = () => { txs = txs.filter(t=>t.id!==tx.id); save(); switchTab(currentTab); };
+
+    const row = document.createElement('div');
+    row.className = 'tx-row';
+    row.onclick = () => {
+      if (swipedId===tx.id) { swipedId=null; row.classList.remove('swiped'); }
+      else { swipedId=tx.id; row.classList.add('swiped'); }
+    };
+
+    row.append(ico, meta2, amt);
+    wrap.append(delBtn, row);
+  }
+
   container.appendChild(wrap);
 }
 
